@@ -25,8 +25,8 @@ app = Flask(__name__)
 # List all routes that are available
 @app.route("/")
 def home():
-    return (f"Welcome to my Climate App page!<br/>"
-            f"-------------------------------------------<br/>"
+    return (f"Thank you for visiting my Climate App page!<br/>"
+            f"-------------------------------------------------------<br/>"
             f"<br/>"
             f"Available routes:<br/>"
             f"<br/>"
@@ -34,7 +34,11 @@ def home():
             f"/api/v1.0/stations<br/>"
             f"/api/v1.0/tobs<br/>"
             f"/api/v1.0/start_date<br/>"
-            f"/api/v1.0/start_date/end_date<br/>")
+            f"/api/v1.0/start_date/end_date<br/>"
+            f"<br/>"
+            f"-------------------------------------------------------<br/>"
+            f"<br/>"
+            f"Note to user:  please replace start_date or end_date in URL with date format YYYY-MM-DD")
 
 # Define precipitation app route
 @app.route("/api/v1.0/precipitation")
@@ -99,16 +103,34 @@ def observations():
                & (measurement.date >= mostFormer_date)).all()    
 
     # Return the JSON representation of temperature observations
-    return jsonify(yearData)
+    return jsonify(list(yearData))
 
     # Close session
     session.close()
 
 # Define starting date app route
-@app.route("/api/v1.0/<start>")
+@app.route("/api/v1.0/<start_date>")
+@app.route("/api/v1.0/<start_date>/<end_date>")
+def dates(start_date = None, end_date = None):
 
+    # Create our session (link) from Python to the database
+    session = Session(engine)
 
+    # Conditional statement and query if only one date entered by user
+    if not end_date:
+        output = session.query(func.min(measurement.tobs), func.avg(measurement.tobs), func.max(measurement.tobs)).\
+                 filter(measurement.date >= start_date).all()
+        return jsonify(list(output))
+    
+    # Query if dated range entered by user
+    output = session.query(func.min(measurement.tobs), func.avg(measurement.tobs), func.max(measurement.tobs)).\
+                 filter(measurement.date >= start_date).\
+                 filter(measurement.date <= end_date).all()
+    return jsonify(list(output))
 
+    # Close session
+    session.close()
 
+# Define 'main' behavior
 if __name__ == "__main__":
     app.run(debug = True)
