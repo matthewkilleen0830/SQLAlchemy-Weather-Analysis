@@ -1,3 +1,5 @@
+# STEP 2:  CLIMATE APP
+
 # Dependencies and setup
 import datetime as dt
 import sqlalchemy
