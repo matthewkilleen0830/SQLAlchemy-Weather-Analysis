@@ -50,7 +50,8 @@ def precipitation():
     session = Session(engine)
 
     # Perform a query to retrieve the precipitation data
-    precipitationData = session.query(measurement.date, measurement.prcp).all()
+    precipitationData = session.query(measurement.date, measurement.prcp).\
+                        order_by(measurement.date.desc()).all()
 
     # Convert query results to a dictionary using date as the key and prcp as the value
     precipitationDictionary = {}
